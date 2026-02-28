@@ -18,6 +18,7 @@ class SendMailJob implements ShouldQueue
     protected $name;
     protected $email;
     protected $otp;
+    protected $purpose;
 
     /**
      * Create a new job instance.
@@ -25,12 +26,14 @@ class SendMailJob implements ShouldQueue
      * @param string $name
      * @param string $email
      * @param string $otp
+     * @param string $purpose
      */
-    public function __construct($name, $email, $otp)
+    public function __construct($name, $email, $otp, $purpose = 'verification')
     {
         $this->name = $name;
         $this->email = $email;
         $this->otp = $otp;
+        $this->purpose = $purpose;
     }
 
     /**
@@ -44,7 +47,7 @@ class SendMailJob implements ShouldQueue
             otp: $this->otp,
             userName: $this->name,
             expiresIn: 10,
-            purpose: 'verification'
+            purpose: $this->purpose
         ));
     }
 
