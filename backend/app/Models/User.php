@@ -28,6 +28,7 @@ class User extends Authenticatable
         'otp_code',
         'is_active',
         'is_verified',
+        'is_available',
         'is_deleted',
         'last_login_at',
         'otp_expires_at',
@@ -63,6 +64,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_verified' => 'boolean',
+            'is_available' => 'boolean',
             'is_deleted' => 'boolean',
             'deleted_at' => 'datetime',
             'otp_expires_at' => 'datetime',
@@ -71,5 +73,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
         ];
+    }
+
+    public function requests()
+    {
+        return $this->hasMany(TowingRequest::class, 'customer_id');
+    }
+
+    public function acceptedRequests()
+    {
+        return $this->hasMany(TowingRequest::class, 'accepted_by');
     }
 }
