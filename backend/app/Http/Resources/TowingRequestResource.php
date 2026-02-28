@@ -24,10 +24,12 @@ class TowingRequestResource extends JsonResource
             'pickup' => [
                 'lat' => (float) $this->pickup_lat,
                 'lng' => (float) $this->pickup_lng,
+                'address' => $this->pickup_address,
             ],
             'destination' => [
                 'lat' => (float) $this->destination_lat,
                 'lng' => (float) $this->destination_lng,
+                'address' => $this->destination_address,
             ],
             'note' => $this->note,
             'status' => $this->status,

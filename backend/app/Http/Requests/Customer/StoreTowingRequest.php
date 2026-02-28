@@ -30,8 +30,10 @@ class StoreTowingRequest extends FormRequest
             'vehicle_type' => 'required|string|in:car,suv,truck,motorcycle,other',
             'pickup_lat' => 'required|numeric|between:-90,90',
             'pickup_lng' => 'required|numeric|between:-180,180',
+            'pickup_address' => 'nullable|string|max:500',
             'destination_lat' => 'nullable|numeric|between:-90,90',
             'destination_lng' => 'nullable|numeric|between:-180,180',
+            'destination_address' => 'nullable|string|max:500',
             'note' => 'nullable|string|max:1000',
         ];
     }
