@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 require __DIR__ . '/auth.php';
 
 Route::post('v1/requests', [\App\Http\Controllers\Api\V1\Customer\RequestController::class, 'store']);
+Route::get('v1/requests/track/{id}', [\App\Http\Controllers\Api\V1\Customer\RequestController::class, 'track']);
 
 Route::middleware(['auth:sanctum', 'role:customer'])->prefix('v1/customer')->group(function () {
     Route::get('/requests', [\App\Http\Controllers\Api\V1\Customer\RequestController::class, 'index']);

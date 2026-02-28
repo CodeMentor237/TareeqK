@@ -24,6 +24,25 @@ class RequestController extends Controller
         return TowingRequestResource::collection($requests);
     }
 
+    public function track($id)
+    {
+        $towingRequest = TowingRequest::with(['driver', 'logs.user'])
+            ->where('tracking_id', $id)
+            ->first();
+
+        if (!$towingRequest) {
+            return new ErrorResource([
+                'message' => 'Request not found',
+                'status_code' => 404
+            ]);
+        }
+
+        return new SuccessResource([
+            'message' => 'Request details retrieved successfully',
+            'data' => new TowingRequestResource($towingRequest)
+        ]);
+    }
+
     public function store(StoreTowingRequest $request)
     {
         return DB::transaction(function () use ($request) {
