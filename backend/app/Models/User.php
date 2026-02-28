@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,19 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
+        'avatar',
+        'otp_code',
+        'is_active',
+        'is_verified',
+        'is_deleted',
+        'last_login_at',
+        'otp_expires_at',
+        'email_verified_at',
+        'phone_verified_at',
+        'otp_verified_at',
+        'deleted_at',
     ];
 
     /**
@@ -31,6 +45,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'deleted_at',
+        'otp_code',
+        'otp_expires_at',
+        'otp_verified_at',
     ];
 
     /**
@@ -43,6 +61,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'is_verified' => 'boolean',
+            'is_deleted' => 'boolean',
+            'deleted_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
+            'otp_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
         ];
     }
 }
