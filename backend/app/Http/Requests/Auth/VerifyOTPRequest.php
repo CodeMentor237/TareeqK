@@ -4,7 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Validator;
+use Illuminate\Contracts\Validation\Validator;
 
 class VerifyOTPRequest extends FormRequest
 {
@@ -63,7 +63,7 @@ class VerifyOTPRequest extends FormRequest
     /**
      * Handle failed validation.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
      * @return void
      */
     protected function failedValidation(Validator $validator)

@@ -10,6 +10,7 @@ use App\Http\Requests\Auth\VerifyOTPRequest;
 use App\Http\Resources\ErrorResource;
 use App\Http\Resources\SuccessResource;
 use App\Jobs\SendMailJob;
+use App\Jobs\SendWelcomeMailJob;
 use App\Models\User;
 use App\Services\OTPService;
 
@@ -84,6 +85,9 @@ class OTPController extends Controller
 
         // Clear OTP and mark email as verified
         $this->otpService->clearOTP($user);
+
+        // Send Welcome Mail
+        SendWelcomeMailJob::dispatch($user->name, $user->email);
 
         return new SuccessResource([
             'message' => 'OTP verified successfully'

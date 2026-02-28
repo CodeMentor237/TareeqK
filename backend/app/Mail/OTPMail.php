@@ -42,7 +42,7 @@ class OTPMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'O T P Mail',
+            subject: 'TareeqK - OTP Verification',
         );
     }
 

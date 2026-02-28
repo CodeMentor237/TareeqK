@@ -16,9 +16,15 @@ class AuthResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'user' => new UserResource($this->resource),
-            'token' => $this->token,
-            'token_type' => 'Bearer',
+            'status' => 'success',
+            'data' => array_merge(
+                (new UserResource($this->resource['user']))->toArray($request),
+                [
+                    'access_token' => $this->resource['access_token'],
+                    'refresh_token' => $this->resource['refresh_token'],
+                    'token_type' => 'Bearer',
+                ]
+            )
         ];
     }
 }

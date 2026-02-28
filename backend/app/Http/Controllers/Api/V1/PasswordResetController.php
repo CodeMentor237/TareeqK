@@ -8,8 +8,10 @@ use App\Http\Requests\Auth\SendOTPRequest;
 use App\Http\Resources\ErrorResource;
 use App\Http\Resources\SuccessResource;
 use App\Jobs\SendMailJob;
+use App\Jobs\SendPasswordResetSuccessJob;
 use App\Models\User;
 use App\Services\OTPService;
+use Illuminate\Support\Facades\Hash;
 
 class PasswordResetController extends Controller
 {
@@ -91,6 +93,13 @@ class PasswordResetController extends Controller
 
         // Clear OTP and mark email as verified
         $this->otpService->clearOTP($user);
+
+        $user->update([
+            'password' => Hash::make($validated['password'])
+        ]);
+
+        // Send Password Reset Success Mail
+        SendPasswordResetSuccessJob::dispatch($user->name, $user->email);
 
         $user->tokens()->delete();
 

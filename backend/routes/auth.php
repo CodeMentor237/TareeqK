@@ -18,6 +18,8 @@ Route::prefix('v1/auth')->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
     Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+
     //Protected routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/logout', [AuthController::class, 'logout']);

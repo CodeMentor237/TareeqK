@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exception\HttpResponseException;
-use Illuminate\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class ResetPasswordRequest extends FormRequest
 {
@@ -68,10 +68,10 @@ class ResetPasswordRequest extends FormRequest
     /**
      * Failed validation callback
      *
-     * @param  \Illuminate\Validation\Validator  $validator
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
      * @return void
      */
-    public function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
             'status' => 'error',
