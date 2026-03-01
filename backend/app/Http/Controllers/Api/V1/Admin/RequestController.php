@@ -18,7 +18,7 @@ class RequestController extends Controller
             'message' => 'Dashboard statistics retrieved successfully',
             'data' => [
                 'total_requests' => TowingRequest::count(),
-                'active_requests' => TowingRequest::whereIn('status', ['pending', 'accepted', 'ongoing'])->count(),
+                'active_requests' => TowingRequest::whereIn('status', ['pending', 'accepted', 'in_progress'])->count(),
                 'completed_requests' => TowingRequest::where('status', 'completed')->count(),
                 'cancelled_requests' => TowingRequest::where('status', 'cancelled')->count(),
                 'available_drivers' => User::where('role', 'driver')->where('is_available', true)->count(),
@@ -68,7 +68,7 @@ class RequestController extends Controller
 
             $towingRequest->update([
                 'accepted_by' => $newDriver->id,
-                'status' => 'accepted' // Reset to accepted if it was pending or ongoing? Plan says just "Reassign"
+                'status' => 'accepted' // Reset to accepted if it was pending or in_progress? Plan says just "Reassign"
             ]);
 
             $newDriver->update(['is_available' => false]);
@@ -88,7 +88,7 @@ class RequestController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|in:pending,accepted,ongoing,completed,cancelled'
+            'status' => 'required|string|in:pending,accepted,in_progress,completed,cancelled'
         ]);
 
         return DB::transaction(function () use ($request, $id) {
@@ -116,7 +116,7 @@ class RequestController extends Controller
                 if ($towingRequest->accepted_by) {
                     User::find($towingRequest->accepted_by)->update(['is_available' => true]);
                 }
-            } elseif ($newStatus === 'accepted' || $newStatus === 'ongoing') {
+            } elseif ($newStatus === 'accepted' || $newStatus === 'in_progress') {
                 if ($towingRequest->accepted_by) {
                     User::find($towingRequest->accepted_by)->update(['is_available' => false]);
                 }
