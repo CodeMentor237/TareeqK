@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
-    ActivityIndicator, Alert, Linking,
+    ActivityIndicator, Alert, Linking, SafeAreaView,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RequestStackParamList } from '../../../navigation/RequestStack';
+import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 import { driverService, TowingRequest } from '../../../services/driver.service';
 import { useDriverStore } from '../../../store/driver.store';
 
-type OngoingNavigationProp = NativeStackNavigationProp<RequestStackParamList, 'OngoingRequest'>;
-type OngoingRouteProp = RouteProp<RequestStackParamList, 'OngoingRequest'>;
+type OngoingNavigationProp = NativeStackNavigationProp<RootStackParamList, 'OngoingRequest'>;
+type OngoingRouteProp = RouteProp<RootStackParamList, 'OngoingRequest'>;
 
 export default function OngoingRequestScreen() {
     const navigation = useNavigation<OngoingNavigationProp>();
@@ -28,9 +28,7 @@ export default function OngoingRequestScreen() {
     const [isCompleting, setIsCompleting] = useState(false);
 
     useEffect(() => {
-        if (!currentRequest) {
-            loadRequest();
-        }
+        loadRequest();
     }, []);
 
     const loadRequest = async () => {
@@ -102,180 +100,315 @@ export default function OngoingRequestScreen() {
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-            {/* Status Banner */}
-            <View style={styles.statusBanner}>
-                <Text style={styles.statusEmoji}>🚛</Text>
-                <Text style={styles.statusTitle}>Towing In Progress</Text>
-                <Text style={styles.statusSubtitle}>#{request.id}</Text>
-            </View>
-
-            {/* Customer Info */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Customer</Text>
-                <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Name:</Text>
-                    <Text style={styles.infoValue}>{request.customer_name}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Phone:</Text>
-                    <TouchableOpacity onPress={() => Linking.openURL(`tel:${request.customer_phone}`)}>
-                        <Text style={[styles.infoValue, styles.linkText]}>{request.customer_phone}</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Vehicle:</Text>
-                    <Text style={styles.infoValue}>{request.vehicle_type}</Text>
-                </View>
-            </View>
-
-            {/* Destination */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Destination</Text>
-                <Text style={styles.addressText}>
-                    {request.destination.address || `${request.destination.lat}, ${request.destination.lng}`}
-                </Text>
-                <TouchableOpacity
-                    style={styles.mapsButton}
-                    onPress={() => openInGoogleMaps(request.destination.lat, request.destination.lng)}
-                >
-                    <Text style={styles.mapsButtonText}>🗺️ Navigate to Destination</Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>←</Text>
                 </TouchableOpacity>
+                <View style={styles.headerTitleWrapper}>
+                    <Text style={styles.headerTitle}>Active Journey</Text>
+                    <Text style={styles.headerSubtitle}>#{request.id.slice(0, 8).toUpperCase()}</Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: colors.success + '15' }]}>
+                    <Text style={[styles.statusBadgeText, { color: colors.success }]}>
+                        IN PROGRESS
+                    </Text>
+                </View>
             </View>
 
-            {/* Note */}
-            {request.note ? (
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Note</Text>
-                    <Text style={styles.noteText}>{request.note}</Text>
+            <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
+                <View style={styles.banner}>
+                    <Text style={styles.bannerEmoji}>🚛</Text>
+                    <Text style={styles.bannerTitle}>Towing to Destination</Text>
+                    <Text style={styles.bannerSubtitle}>Please follow the route in Google Maps</Text>
                 </View>
-            ) : null}
 
-            {/* Complete Button */}
-            <TouchableOpacity
-                style={[styles.completeButton, isCompleting && styles.disabledButton]}
-                onPress={handleComplete}
-                disabled={isCompleting}
-            >
-                {isCompleting ? (
-                    <ActivityIndicator color={colors.white} />
-                ) : (
-                    <Text style={styles.completeButtonText}>✅ Mark as Completed</Text>
-                )}
-            </TouchableOpacity>
-        </ScrollView>
+                {/* Destination Card */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>Destination Details</Text>
+                    <View style={styles.addressWrapper}>
+                        <View style={styles.addressItem}>
+                            <View style={[styles.marker, { backgroundColor: colors.primary }]} />
+                            <View style={styles.addressInfo}>
+                                <Text style={styles.addressLabel}>Drop-off Location</Text>
+                                <Text style={styles.addressText}>{request.destination.address || 'Selected Location'}</Text>
+                                <TouchableOpacity
+                                    style={styles.mapBtn}
+                                    onPress={() => openInGoogleMaps(request.destination.lat, request.destination.lng)}
+                                >
+                                    <Text style={styles.mapBtnText}>🛰️ Start Live Navigation</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Customer Contact */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>Contact Customer</Text>
+                    <View style={styles.contactRow}>
+                        <View style={styles.avatarMini}>
+                            <Text style={styles.avatarMiniText}>{request.customer_name.charAt(0)}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.customerName}>{request.customer_name}</Text>
+                            <Text style={styles.vehicleType}>{request.vehicle_type}</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.callBtn}
+                            onPress={() => Linking.openURL(`tel:${request.customer_phone}`)}
+                        >
+                            <Text style={styles.callBtnText}>📞 Call</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Action Footer */}
+                <View style={styles.footer}>
+                    <TouchableOpacity
+                        style={[styles.completeBtn, isCompleting && styles.disabledButton]}
+                        onPress={handleComplete}
+                        disabled={isCompleting}
+                    >
+                        {isCompleting ? (
+                            <ActivityIndicator color={colors.white} />
+                        ) : (
+                            <Text style={styles.completeBtnText}>FINISH & COMPLETE JOB</Text>
+                        )}
+                    </TouchableOpacity>
+                    <Text style={styles.footerHint}>Only mark as completed once the vehicle is delivered and unloaded.</Text>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: '#F8F9FA',
     },
-    contentContainer: {
+    flex: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.xl,
+        paddingVertical: spacing.lg,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F3F5',
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#F1F3F5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: spacing.md,
+    },
+    backButtonText: {
+        fontSize: 24,
+        color: colors.text,
+        fontWeight: 'bold',
+    },
+    headerTitleWrapper: {
+        flex: 1,
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: colors.text,
+    },
+    headerSubtitle: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        fontWeight: '600',
+    },
+    statusBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    statusBadgeText: {
+        fontSize: 10,
+        fontWeight: '900',
+    },
+    scrollContent: {
         padding: spacing.lg,
-        paddingTop: spacing.xxl,
+        paddingBottom: spacing.xxl,
+    },
+    banner: {
+        alignItems: 'center',
+        marginBottom: spacing.xl,
+        marginTop: spacing.sm,
+    },
+    bannerEmoji: {
+        fontSize: 50,
+        marginBottom: spacing.md,
+    },
+    bannerTitle: {
+        fontSize: 22,
+        fontWeight: '900',
+        color: colors.text,
+        textAlign: 'center',
+    },
+    bannerSubtitle: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        textAlign: 'center',
+        marginTop: 4,
+        fontWeight: '500',
+    },
+    card: {
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        padding: spacing.xl,
+        marginBottom: spacing.lg,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+    },
+    cardTitle: {
+        fontSize: 14,
+        fontWeight: '900',
+        color: colors.textSecondary,
+        marginBottom: spacing.lg,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    addressWrapper: {
+        position: 'relative',
+    },
+    marker: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        marginRight: 15,
+        marginTop: 5,
+    },
+    addressItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    addressInfo: {
+        flex: 1,
+    },
+    addressLabel: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: colors.textSecondary,
+        textTransform: 'uppercase',
+    },
+    addressText: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: colors.text,
+        marginTop: 4,
+    },
+    mapBtn: {
+        marginTop: spacing.lg,
+        backgroundColor: colors.primary,
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    mapBtnText: {
+        fontSize: 14,
+        color: colors.white,
+        fontWeight: '800',
+    },
+    contactRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+    },
+    avatarMini: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#F1F3F5',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarMiniText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.text,
+    },
+    customerName: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: colors.text,
+    },
+    vehicleType: {
+        fontSize: 13,
+        color: colors.textSecondary,
+        fontWeight: '600',
+    },
+    callBtn: {
+        backgroundColor: colors.success + '15',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 12,
+    },
+    callBtnText: {
+        color: colors.success,
+        fontWeight: '900',
+    },
+    footer: {
+        marginTop: spacing.xl,
+        alignItems: 'center',
+    },
+    completeBtn: {
+        width: '100%',
+        height: 60,
+        backgroundColor: colors.success,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 4,
+        shadowColor: colors.success,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+    },
+    completeBtnText: {
+        fontSize: 16,
+        fontWeight: '900',
+        color: colors.white,
+        letterSpacing: 1,
+    },
+    footerHint: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        textAlign: 'center',
+        marginTop: spacing.md,
+        paddingHorizontal: spacing.xl,
+        fontWeight: '500',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.background,
-    },
-    statusBanner: {
-        alignItems: 'center',
-        backgroundColor: colors.primary,
-        borderRadius: 16,
-        padding: spacing.lg,
-        marginBottom: spacing.lg,
-    },
-    statusEmoji: {
-        fontSize: 48,
-        marginBottom: spacing.xs,
-    },
-    statusTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: colors.white,
-    },
-    statusSubtitle: {
-        fontSize: 14,
-        color: 'rgba(255,255,255,0.8)',
-        marginTop: 2,
-    },
-    section: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: spacing.md,
-        marginBottom: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: spacing.sm,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-    },
-    infoLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.textSecondary,
-        width: 80,
-    },
-    infoValue: {
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-    },
-    addressText: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: spacing.sm,
-        lineHeight: 20,
-    },
-    noteText: {
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 20,
-    },
-    mapsButton: {
-        backgroundColor: colors.surface,
-        paddingVertical: spacing.sm,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    mapsButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.primary,
-    },
-    completeButton: {
-        backgroundColor: colors.success,
-        paddingVertical: spacing.md,
-        borderRadius: 12,
-        alignItems: 'center',
-        marginTop: spacing.md,
-    },
-    completeButtonText: {
-        color: colors.white,
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    disabledButton: {
-        opacity: 0.7,
+        backgroundColor: '#F8F9FA',
     },
     errorText: {
         fontSize: 16,
         color: colors.error,
         marginBottom: spacing.md,
+        fontWeight: '700',
     },
     linkText: {
         color: colors.primary,
+        fontWeight: '700',
         textDecorationLine: 'underline',
+    },
+    disabledButton: {
+        opacity: 0.7,
     },
 });

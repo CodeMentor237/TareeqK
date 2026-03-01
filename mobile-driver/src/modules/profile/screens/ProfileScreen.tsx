@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
-    ActivityIndicator, Alert,
+    ActivityIndicator, Alert, SafeAreaView,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
@@ -14,6 +14,13 @@ export default function ProfileScreen() {
     const clearAuth = useAuthStore(state => state.clearAuth);
     const resetDriver = useDriverStore(state => state.reset);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    // Mock stats for premium feel
+    const driverStats = [
+        { label: 'Completed', value: '124', icon: '✅' },
+        { label: 'Rating', value: '4.9', icon: '⭐' },
+        { label: 'Experience', value: '2y', icon: '🏆' },
+    ];
 
     const handleLogout = () => {
         Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -36,165 +43,336 @@ export default function ProfileScreen() {
         ]);
     };
 
+    const MenuItem = ({ icon, label, value, onPress, showArrow = true, isDestructive = false }: any) => (
+        <TouchableOpacity
+            style={styles.menuItem}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
+            <View style={[styles.menuIconContainer, isDestructive && styles.destructiveIconBg]}>
+                <Text style={styles.menuIconText}>{icon}</Text>
+            </View>
+            <View style={styles.menuLabelContainer}>
+                <Text style={[styles.menuLabel, isDestructive && styles.destructiveText]}>{label}</Text>
+            </View>
+            {value && <Text style={styles.menuValue}>{value}</Text>}
+            {showArrow && <Text style={styles.menuArrow}>›</Text>}
+        </TouchableOpacity>
+    );
+
+    const SectionHeader = ({ title }: { title: string }) => (
+        <Text style={styles.sectionTitle}>{title}</Text>
+    );
+
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                        {user?.name?.charAt(0)?.toUpperCase() || 'D'}
-                    </Text>
+        <SafeAreaView style={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                {/* Modern Header */}
+                <View style={styles.header}>
+                    <View style={styles.avatarContainer}>
+                        <View style={styles.avatar}>
+                            <Text style={styles.avatarText}>
+                                {user?.name?.charAt(0)?.toUpperCase() || 'D'}
+                            </Text>
+                        </View>
+                        <TouchableOpacity style={styles.editAvatarBtn} activeOpacity={0.8}>
+                            <Text style={styles.editAvatarIcon}>📸</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.name}>{user?.name}</Text>
+                    <Text style={styles.email}>{user?.email}</Text>
+
+                    <View style={styles.badgeRow}>
+                        <View style={styles.roleBadge}>
+                            <Text style={styles.roleText}>{user?.role?.toUpperCase()}</Text>
+                        </View>
+                        <View style={styles.statusBadge}>
+                            <View style={styles.statusDot} />
+                            <Text style={styles.statusText}>VERIFIED</Text>
+                        </View>
+                    </View>
                 </View>
-                <Text style={styles.name}>{user?.name}</Text>
-                <Text style={styles.email}>{user?.email}</Text>
-                <View style={styles.roleBadge}>
-                    <Text style={styles.roleText}>{user?.role?.toUpperCase()}</Text>
+
+                {/* Stats Bar */}
+                <View style={styles.statsContainer}>
+                    {driverStats.map((stat, index) => (
+                        <View key={index} style={[styles.statItem, index !== driverStats.length - 1 && styles.statDivider]}>
+                            <Text style={styles.statIcon}>{stat.icon}</Text>
+                            <Text style={styles.statValue}>{stat.value}</Text>
+                            <Text style={styles.statLabel}>{stat.label}</Text>
+                        </View>
+                    ))}
                 </View>
-            </View>
 
-            {/* Menu Items */}
-            <View style={styles.menuSection}>
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>✏️</Text>
-                    <Text style={styles.menuLabel}>Edit Profile</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
+                {/* Menu Sections */}
+                <View style={styles.menuContainer}>
+                    <SectionHeader title="Account Settings" />
+                    <View style={styles.menuGroup}>
+                        <MenuItem icon="👤" label="Personal Information" />
+                        <MenuItem icon="🔒" label="Security & Password" />
+                        <MenuItem icon="📄" label="Driver Documents" value="Updated" />
+                    </View>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>🔒</Text>
-                    <Text style={styles.menuLabel}>Change Password</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
+                    <SectionHeader title="Preferences" />
+                    <View style={styles.menuGroup}>
+                        <MenuItem icon="🌍" label="Language" value="English" />
+                        <MenuItem icon="🔔" label="Notifications" />
+                        <MenuItem icon="🌙" label="Appearance" value="Light" />
+                    </View>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>🌍</Text>
-                    <Text style={styles.menuLabel}>Language</Text>
-                    <Text style={styles.menuValue}>English</Text>
-                </TouchableOpacity>
-            </View>
+                    <SectionHeader title="Support & Legal" />
+                    <View style={styles.menuGroup}>
+                        <MenuItem icon="🎧" label="Help Center" />
+                        <MenuItem icon="📜" label="Terms of Service" />
+                        <MenuItem icon="🛡️" label="Privacy Policy" />
+                    </View>
 
-            {/* Logout */}
-            <TouchableOpacity
-                style={[styles.logoutButton, isLoggingOut && styles.disabledButton]}
-                onPress={handleLogout}
-                disabled={isLoggingOut}
-            >
-                {isLoggingOut ? (
-                    <ActivityIndicator color={colors.white} />
-                ) : (
-                    <Text style={styles.logoutButtonText}>Logout</Text>
-                )}
-            </TouchableOpacity>
+                    <View style={[styles.menuGroup, { marginTop: spacing.xl }]}>
+                        <MenuItem
+                            icon="🚪"
+                            label="Logout"
+                            onPress={handleLogout}
+                            showArrow={false}
+                            isDestructive={true}
+                        />
+                    </View>
+                </View>
 
-            <Text style={styles.version}>TareeqK Driver v1.0.0</Text>
-        </ScrollView>
+                <View style={styles.footer}>
+                    <Text style={styles.version}>TareeqK Driver App</Text>
+                    <Text style={styles.versionNumber}>Version 1.0.0 (Build 342)</Text>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: '#F8F9FA',
     },
-    contentContainer: {
+    scrollContent: {
         paddingBottom: spacing.xxl,
     },
     header: {
         alignItems: 'center',
-        paddingTop: spacing.xxl + spacing.lg,
-        paddingBottom: spacing.xl,
+        paddingVertical: spacing.lg,
         backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+    },
+    avatarContainer: {
+        position: 'relative',
+        marginBottom: spacing.md,
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: spacing.md,
+        borderWidth: 4,
+        borderColor: '#F1F3F5',
     },
     avatarText: {
-        fontSize: 32,
-        fontWeight: 'bold',
+        fontSize: 40,
+        fontWeight: '900',
         color: colors.white,
     },
+    editAvatarBtn: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: colors.white,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    editAvatarIcon: {
+        fontSize: 16,
+    },
     name: {
-        fontSize: 22,
-        fontWeight: 'bold',
+        fontSize: 24,
+        fontWeight: '900',
         color: colors.text,
-        marginBottom: spacing.xs,
+        marginBottom: 4,
     },
     email: {
         fontSize: 14,
         color: colors.textSecondary,
-        marginBottom: spacing.sm,
+        fontWeight: '500',
+        marginBottom: spacing.md,
+    },
+    badgeRow: {
+        flexDirection: 'row',
+        gap: spacing.sm,
     },
     roleBadge: {
-        backgroundColor: colors.primary + '20',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 4,
+        backgroundColor: colors.primary + '15',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         borderRadius: 12,
     },
     roleText: {
-        fontSize: 12,
-        fontWeight: '700',
+        fontSize: 11,
+        fontWeight: '800',
         color: colors.primary,
+        letterSpacing: 0.5,
     },
-    menuSection: {
+    statusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.success + '15',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+    },
+    statusDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: colors.success,
+        marginRight: 6,
+    },
+    statusText: {
+        fontSize: 11,
+        fontWeight: '800',
+        color: colors.success,
+        letterSpacing: 0.5,
+    },
+    statsContainer: {
+        flexDirection: 'row',
         backgroundColor: colors.white,
-        marginTop: spacing.lg,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: colors.border,
+        marginHorizontal: spacing.lg,
+        marginTop: -30,
+        borderRadius: 24,
+        padding: spacing.lg,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.1,
+        shadowRadius: 16,
+        zIndex: 10,
+    },
+    statItem: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    statDivider: {
+        borderRightWidth: 1,
+        borderRightColor: '#F1F3F5',
+    },
+    statIcon: {
+        fontSize: 18,
+        marginBottom: 4,
+    },
+    statValue: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: colors.text,
+    },
+    statLabel: {
+        fontSize: 11,
+        color: colors.textSecondary,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+    },
+    menuContainer: {
+        paddingTop: spacing.xl,
+        paddingHorizontal: spacing.lg,
+    },
+    sectionTitle: {
+        fontSize: 13,
+        fontWeight: '800',
+        color: colors.textSecondary,
+        marginBottom: spacing.sm,
+        marginLeft: spacing.xs,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    menuGroup: {
+        backgroundColor: colors.white,
+        borderRadius: 24,
+        overflow: 'hidden',
+        marginBottom: spacing.xl,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
+        padding: spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: colors.surface,
+        borderBottomColor: '#F8F9FA',
     },
-    menuIcon: {
-        fontSize: 20,
+    menuIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: '#F1F3F5',
+        justifyContent: 'center',
+        alignItems: 'center',
         marginRight: spacing.md,
     },
-    menuLabel: {
+    destructiveIconBg: {
+        backgroundColor: colors.error + '10',
+    },
+    menuIconText: {
+        fontSize: 18,
+    },
+    menuLabelContainer: {
         flex: 1,
+    },
+    menuLabel: {
         fontSize: 16,
+        fontWeight: '600',
         color: colors.text,
     },
-    menuArrow: {
-        fontSize: 24,
-        color: colors.textSecondary,
+    destructiveText: {
+        color: colors.error,
     },
     menuValue: {
         fontSize: 14,
         color: colors.textSecondary,
+        fontWeight: '500',
+        marginRight: spacing.xs,
     },
-    logoutButton: {
-        backgroundColor: colors.error,
-        marginHorizontal: spacing.lg,
-        marginTop: spacing.xl,
-        paddingVertical: spacing.md,
-        borderRadius: 8,
+    menuArrow: {
+        fontSize: 20,
+        color: '#DEE2E6',
+        fontWeight: '300',
+    },
+    footer: {
         alignItems: 'center',
-    },
-    logoutButtonText: {
-        color: colors.white,
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    disabledButton: {
-        opacity: 0.7,
+        marginTop: spacing.sm,
+        marginBottom: spacing.xxl,
     },
     version: {
-        textAlign: 'center',
+        fontSize: 14,
+        fontWeight: '800',
         color: colors.textSecondary,
+    },
+    versionNumber: {
         fontSize: 12,
-        marginTop: spacing.lg,
+        color: colors.textSecondary,
+        marginTop: 2,
     },
 });

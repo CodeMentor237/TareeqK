@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, StyleSheet, FlatList, TouchableOpacity,
-    ActivityIndicator, RefreshControl,
+    ActivityIndicator, RefreshControl, ScrollView,
 } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 import { driverService, TowingRequest } from '../../../services/driver.service';
 
-type FilterType = 'all' | 'completed' | 'cancelled';
+type FilterType = 'all' | 'active' | 'completed' | 'cancelled';
 
 export default function HistoryScreen() {
+    const navigation = useNavigation<any>();
     const [requests, setRequests] = useState<TowingRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -18,9 +20,12 @@ export default function HistoryScreen() {
     const [hasMore, setHasMore] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    useEffect(() => {
-        loadHistory(1, true);
-    }, [filter]);
+    // Refresh data when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            loadHistory(1, true);
+        }, [filter])
+    );
 
     const loadHistory = async (pg: number, reset: boolean = false) => {
         if (reset) {
@@ -53,64 +58,102 @@ export default function HistoryScreen() {
         loadHistory(page + 1, false);
     };
 
-    const getStatusColor = (status: string) => {
+    const getStatusStyles = (status: string) => {
         switch (status) {
             case 'completed':
-                return colors.success;
+                return { color: colors.success, bg: colors.success + '15', label: 'Completed' };
             case 'cancelled':
-                return colors.error;
+                return { color: colors.error, bg: colors.error + '15', label: 'Cancelled' };
+            case 'accepted':
+                return { color: colors.primary, bg: colors.primary + '15', label: 'Accepted' };
+            case 'in_progress':
+                return { color: '#FF9800', bg: '#FF980015', label: 'In Progress' };
             default:
-                return colors.textSecondary;
+                return { color: colors.textSecondary, bg: colors.surface, label: status };
         }
     };
 
-    const renderItem = ({ item }: { item: TowingRequest }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <Text style={styles.cardVehicle}>🚗 {item.vehicle_type}</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-                        {item.status.toUpperCase()}
+    const renderItem = ({ item }: { item: TowingRequest }) => {
+        const status = getStatusStyles(item.status);
+
+        return (
+            <TouchableOpacity
+                style={styles.card}
+                onPress={() => {
+                    if (item.status === 'in_progress') {
+                        navigation.navigate('OngoingRequest', { trackingId: item.id });
+                    } else {
+                        navigation.navigate('RequestDetails', { trackingId: item.id });
+                    }
+                }}
+            >
+                <View style={styles.cardHeader}>
+                    <View>
+                        <Text style={styles.cardVehicle}>🚗 {item.vehicle_type}</Text>
+                        <Text style={styles.cardCustomerId}>Job #{item.id.slice(0, 8).toUpperCase()}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                        <Text style={[styles.statusText, { color: status.color }]}>
+                            {status.label.toUpperCase()}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.cardDivider} />
+
+                <View style={styles.addressContainer}>
+                    <View style={styles.addressRow}>
+                        <View style={styles.dot} />
+                        <Text style={styles.cardAddress} numberOfLines={1}>
+                            {item.pickup.address || 'Pickup Point'}
+                        </Text>
+                    </View>
+                    <View style={[styles.dot, { backgroundColor: colors.primary, marginVertical: 4 }]} />
+                    <View style={styles.addressRow}>
+                        <View style={[styles.dot, { backgroundColor: colors.primary }]} />
+                        <Text style={styles.cardAddress} numberOfLines={1}>
+                            {item.destination.address || 'Destination'}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.cardFooter}>
+                    <Text style={styles.cardCustomer}>👤 {item.customer_name}</Text>
+                    <Text style={styles.cardDate}>
+                        {new Date(item.created_at).toLocaleDateString()}
                     </Text>
                 </View>
-            </View>
-
-            <Text style={styles.cardAddress} numberOfLines={1}>
-                📍 From: {item.pickup.address || `${item.pickup.lat.toFixed(4)}, ${item.pickup.lng.toFixed(4)}`}
-            </Text>
-            <Text style={styles.cardAddress} numberOfLines={1}>
-                📍 To: {item.destination.address || `${item.destination.lat.toFixed(4)}, ${item.destination.lng.toFixed(4)}`}
-            </Text>
-
-            <View style={styles.cardFooter}>
-                <Text style={styles.cardCustomer}>👤 {item.customer_name}</Text>
-                <Text style={styles.cardDate}>
-                    {new Date(item.created_at).toLocaleDateString()}
-                </Text>
-            </View>
-        </View>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.container}>
-            {/* Header */}
+            {/* Premium Header */}
             <View style={styles.header}>
-                <Text style={styles.title}>History</Text>
+                <Text style={styles.title}>Job History</Text>
+                <Text style={styles.subtitle}>Track and manage your towing jobs</Text>
             </View>
 
             {/* Filter Tabs */}
-            <View style={styles.filterContainer}>
-                {(['all', 'completed', 'cancelled'] as FilterType[]).map((f) => (
-                    <TouchableOpacity
-                        key={f}
-                        style={[styles.filterTab, filter === f && styles.filterTabActive]}
-                        onPress={() => setFilter(f)}
-                    >
-                        <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-                            {f.charAt(0).toUpperCase() + f.slice(1)}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+            <View style={styles.filterWrapper}>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterScroll}
+                >
+                    {(['all', 'active', 'completed', 'cancelled'] as FilterType[]).map((f) => (
+                        <TouchableOpacity
+                            key={f}
+                            style={[styles.filterTab, filter === f && styles.filterTabActive]}
+                            onPress={() => setFilter(f)}
+                        >
+                            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
+                                {f.charAt(0).toUpperCase() + f.slice(1)}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
 
             {/* Content */}
@@ -125,7 +168,12 @@ export default function HistoryScreen() {
                     renderItem={renderItem}
                     contentContainerStyle={styles.listContent}
                     refreshControl={
-                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            onRefresh={onRefresh}
+                            colors={[colors.primary]}
+                            tintColor={colors.primary}
+                        />
                     }
                     onEndReached={onEndReached}
                     onEndReachedThreshold={0.3}
@@ -136,10 +184,12 @@ export default function HistoryScreen() {
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyEmoji}>📋</Text>
-                            <Text style={styles.emptyTitle}>No history yet</Text>
+                            <View style={styles.emptyIconCircle}>
+                                <Text style={{ fontSize: 40 }}>📋</Text>
+                            </View>
+                            <Text style={styles.emptyTitle}>No Jobs Found</Text>
                             <Text style={styles.emptySubtitle}>
-                                Completed and cancelled jobs will appear here.
+                                Your {filter === 'all' ? '' : filter} jobs will appear here once you start taking requests.
                             </Text>
                         </View>
                     }
@@ -152,40 +202,47 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: '#F8F9FA',
     },
     header: {
-        padding: spacing.lg,
-        paddingTop: spacing.xxl,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.lg,
         backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
     },
     title: {
-        fontSize: 26,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '900',
         color: colors.text,
     },
-    filterContainer: {
-        flexDirection: 'row',
-        padding: spacing.sm,
+    subtitle: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        marginTop: 4,
+        fontWeight: '500',
+    },
+    filterWrapper: {
         backgroundColor: colors.white,
         borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomColor: '#F1F3F5',
+    },
+    filterScroll: {
+        paddingHorizontal: spacing.lg,
+        paddingBottom: spacing.md,
     },
     filterTab: {
-        flex: 1,
-        paddingVertical: spacing.sm,
-        alignItems: 'center',
-        borderRadius: 8,
-        marginHorizontal: 4,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: 8,
+        borderRadius: 20,
+        backgroundColor: '#F1F3F5',
+        marginRight: spacing.sm,
     },
     filterTabActive: {
         backgroundColor: colors.primary,
     },
     filterText: {
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '700',
         color: colors.textSecondary,
     },
     filterTextActive: {
@@ -197,79 +254,117 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContent: {
-        padding: spacing.md,
+        padding: spacing.lg,
+        paddingBottom: spacing.xxl,
         flexGrow: 1,
     },
     card: {
         backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: spacing.md,
+        borderRadius: 20,
+        padding: spacing.lg,
         marginBottom: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.border,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
+        alignItems: 'flex-start',
+        marginBottom: spacing.md,
     },
     cardVehicle: {
-        fontSize: 16,
-        fontWeight: '700',
+        fontSize: 17,
+        fontWeight: '800',
         color: colors.text,
     },
+    cardCustomerId: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        fontWeight: '600',
+        marginTop: 2,
+    },
     statusBadge: {
-        paddingHorizontal: spacing.sm,
-        paddingVertical: 2,
-        borderRadius: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 10,
     },
     statusText: {
-        fontSize: 12,
-        fontWeight: '700',
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 0.5,
+    },
+    cardDivider: {
+        height: 1,
+        backgroundColor: '#F1F3F5',
+        marginBottom: spacing.md,
+    },
+    addressContainer: {
+        marginBottom: spacing.md,
+    },
+    addressRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    dot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#DEE2E6',
+        marginRight: 10,
     },
     cardAddress: {
-        fontSize: 13,
-        color: colors.textSecondary,
-        marginBottom: 2,
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        flex: 1,
     },
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: spacing.sm,
-        paddingTop: spacing.sm,
+        paddingTop: spacing.md,
         borderTopWidth: 1,
-        borderTopColor: colors.surface,
+        borderTopColor: '#F1F3F5',
     },
     cardCustomer: {
         fontSize: 13,
         color: colors.text,
-        fontWeight: '500',
+        fontWeight: '700',
     },
     cardDate: {
         fontSize: 12,
         color: colors.textSecondary,
+        fontWeight: '600',
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 100,
+        marginTop: 60,
     },
-    emptyEmoji: {
-        fontSize: 64,
-        marginBottom: spacing.md,
+    emptyIconCircle: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: colors.surface,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: spacing.lg,
     },
     emptyTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontWeight: '800',
         color: colors.text,
-        marginBottom: spacing.xs,
+        marginBottom: 8,
     },
     emptySubtitle: {
         fontSize: 15,
         color: colors.textSecondary,
         textAlign: 'center',
+        paddingHorizontal: spacing.xl,
+        lineHeight: 22,
     },
 });

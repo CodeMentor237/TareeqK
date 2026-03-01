@@ -191,8 +191,11 @@ class RequestController extends Controller
             $query->where('status', 'completed');
         } elseif ($filter === 'cancelled') {
             $query->where('status', 'cancelled');
+        } elseif ($filter === 'active') {
+            $query->whereIn('status', ['accepted', 'in_progress']);
         } else {
-            $query->whereIn('status', ['completed', 'cancelled']);
+            // 'all' includes everything assigned to the driver
+            $query->whereIn('status', ['accepted', 'in_progress', 'completed', 'cancelled']);
         }
 
         $requests = $query->latest()->paginate(15);

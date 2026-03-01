@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, FlatList,
-    ActivityIndicator, RefreshControl, Modal, Alert, Linking,
+    ActivityIndicator, RefreshControl, Alert, Linking, Modal, ScrollView
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RequestStackParamList } from '../../../navigation/RequestStack';
+import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 import { driverService, TowingRequest } from '../../../services/driver.service';
 import { useDriverStore } from '../../../store/driver.store';
 import { useAuthStore } from '../../../store/auth.store';
 
-type HomeNavigationProp = NativeStackNavigationProp<RequestStackParamList, 'Home'>;
-
 const POLL_INTERVAL = 10000; // 10 seconds
 
 export default function HomeScreen() {
-    const navigation = useNavigation<HomeNavigationProp>();
+    const navigation = useNavigation<any>(); // Using any for simplicity in navigation across stacks
     const user = useAuthStore(state => state.user);
     const {
         isAvailable, setAvailable,
@@ -58,7 +56,7 @@ export default function HomeScreen() {
             const response = await driverService.getCurrentRequest();
             if (response.data) {
                 setCurrentRequest(response.data);
-                // Navigate to appropriate screen based on status
+                // Navigate to appropriate screen based on status (on root stack)
                 if (response.data.status === 'accepted') {
                     navigation.navigate('RequestDetails', { trackingId: response.data.id });
                 } else if (response.data.status === 'in_progress') {
@@ -372,8 +370,8 @@ const styles = StyleSheet.create({
     // Premium Header
     headerContainer: {
         backgroundColor: colors.white,
-        paddingHorizontal: spacing.xl,
-        paddingTop: spacing.xxl + 10,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
         paddingBottom: spacing.lg,
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30,
@@ -387,7 +385,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.xl,
+        marginBottom: spacing.sm,
     },
     greeting: {
         fontSize: 14,

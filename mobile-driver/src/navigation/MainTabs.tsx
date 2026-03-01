@@ -1,10 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, StyleSheet } from 'react-native';
-import { RequestStack } from './RequestStack';
+import HomeScreen from '../modules/home/screens/HomeScreen';
 import HistoryScreen from '../modules/history/screens/HistoryScreen';
 import ProfileScreen from '../modules/profile/screens/ProfileScreen';
 import { colors } from '../theme/colors';
+import { spacing } from '../theme/spacing';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,31 +17,31 @@ export function MainTabs() {
                 tabBarStyle: styles.tabBar,
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textSecondary,
-                tabBarLabelStyle: styles.tabLabel,
+                tabBarLabelStyle: styles.tabBarLabel,
             }}
         >
             <Tab.Screen
-                name="HomeTab"
-                component={RequestStack}
+                name="Home"
+                component={HomeScreen}
                 options={{
-                    tabBarLabel: 'Home',
-                    tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>🏠</Text>,
+                    tabBarIcon: ({ color }) => <Text style={{ fontSize: 24, color }}>🏠</Text>,
+                    title: 'Home',
                 }}
             />
             <Tab.Screen
-                name="HistoryTab"
+                name="History"
                 component={HistoryScreen}
                 options={{
-                    tabBarLabel: 'History',
-                    tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>📜</Text>,
+                    tabBarIcon: ({ color }) => <Text style={{ fontSize: 24, color }}>📋</Text>,
+                    title: 'History',
                 }}
             />
             <Tab.Screen
-                name="ProfileTab"
+                name="Profile"
                 component={ProfileScreen}
                 options={{
-                    tabBarLabel: 'Profile',
-                    tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>👤</Text>,
+                    tabBarIcon: ({ color }) => <Text style={{ fontSize: 24, color }}>👤</Text>,
+                    title: 'Profile',
                 }}
             />
         </Tab.Navigator>
@@ -52,15 +53,12 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopColor: colors.border,
         borderTopWidth: 1,
-        paddingBottom: 4,
-        paddingTop: 4,
+        paddingBottom: spacing.sm,
+        paddingTop: spacing.xs,
         height: 60,
     },
-    tabLabel: {
+    tabBarLabel: {
         fontSize: 12,
         fontWeight: '600',
-    },
-    tabIcon: {
-        fontSize: 22,
     },
 });

@@ -3,11 +3,20 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStack } from './AuthStack';
-import { MainTabs } from './MainTabs';
 import { useAuthStore } from '../store/auth.store';
 import { colors } from '../theme/colors';
+import { MainTabs } from './MainTabs';
+import RequestDetailsScreen from '../modules/request/screens/RequestDetailsScreen';
+import OngoingRequestScreen from '../modules/request/screens/OngoingRequestScreen';
 
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+    Auth: undefined;
+    Main: undefined;
+    RequestDetails: { trackingId: string };
+    OngoingRequest: { trackingId: string };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
     const user = useAuthStore(state => state.user);
@@ -30,7 +39,11 @@ export function RootNavigator() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {user ? (
-                    <Stack.Screen name="Main" component={MainTabs} />
+                    <>
+                        <Stack.Screen name="Main" component={MainTabs} />
+                        <Stack.Screen name="RequestDetails" component={RequestDetailsScreen} />
+                        <Stack.Screen name="OngoingRequest" component={OngoingRequestScreen} />
+                    </>
                 ) : (
                     <Stack.Screen name="Auth" component={AuthStack} />
                 )}
