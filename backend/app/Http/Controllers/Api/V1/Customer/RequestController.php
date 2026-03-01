@@ -9,9 +9,11 @@ use App\Http\Resources\PublicTowingRequestResource;
 use App\Http\Resources\SuccessResource;
 use App\Http\Resources\ErrorResource;
 use App\Models\TowingRequest;
-use App\Models\RequestStatusLog;
+use App\Models\User;
+use App\Jobs\SendTowingStatusEmailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class RequestController extends Controller
 {
@@ -123,6 +125,12 @@ class RequestController extends Controller
 
             if ($towingRequest->accepted_by) {
                 $towingRequest->driver->update(['is_available' => true]);
+            }
+
+            // Send email to the first admin via queue
+            $admin = User::where('role', 'admin')->first();
+            if ($admin) {
+                SendTowingStatusEmailJob::dispatch($towingRequest, 'cancelled', $admin->email, $admin->name);
             }
 
             return new SuccessResource([

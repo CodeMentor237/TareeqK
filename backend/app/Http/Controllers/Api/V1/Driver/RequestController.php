@@ -15,6 +15,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendTowingStatusEmailJob;
 
 class RequestController extends Controller
 {
@@ -77,6 +79,11 @@ class RequestController extends Controller
             ]);
 
             $request->user()->update(['is_available' => false]);
+
+            // Send email to customer via queue
+            if ($towingRequest->customer_email) {
+                SendTowingStatusEmailJob::dispatch($towingRequest, 'accepted', $towingRequest->customer_email, $towingRequest->customer_name);
+            }
 
             return new SuccessResource([
                 'message' => 'Request accepted successfully',
@@ -151,6 +158,14 @@ class RequestController extends Controller
 
             if ($newStatus === 'completed') {
                 $request->user()->update(['is_available' => true]);
+            }
+
+            // Send email to customer via queue
+            if ($towingRequest->customer_email) {
+                $mailType = $newStatus === 'in_progress' ? 'ongoing' : ($newStatus === 'completed' ? 'completed' : null);
+                if ($mailType) {
+                    SendTowingStatusEmailJob::dispatch($towingRequest, $mailType, $towingRequest->customer_email, $towingRequest->customer_name);
+                }
             }
 
             return new SuccessResource([

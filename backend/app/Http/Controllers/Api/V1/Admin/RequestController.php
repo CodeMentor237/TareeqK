@@ -7,8 +7,10 @@ use App\Http\Resources\TowingRequestResource;
 use App\Http\Resources\SuccessResource;
 use App\Models\TowingRequest;
 use App\Models\User;
+use App\Jobs\SendTowingStatusEmailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class RequestController extends Controller
 {
@@ -119,6 +121,14 @@ class RequestController extends Controller
             } elseif ($newStatus === 'accepted' || $newStatus === 'in_progress') {
                 if ($towingRequest->accepted_by) {
                     User::find($towingRequest->accepted_by)->update(['is_available' => false]);
+                }
+            }
+
+            // If cancelled, notify admin via queue
+            if ($newStatus === 'cancelled') {
+                $admin = User::where('role', 'admin')->first();
+                if ($admin) {
+                    SendTowingStatusEmailJob::dispatch($towingRequest, 'cancelled', $admin->email, $admin->name);
                 }
             }
 
