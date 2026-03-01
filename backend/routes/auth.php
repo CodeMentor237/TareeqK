@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\V1\OTPController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1/auth')->group(function () {
+Route::prefix('v1/auth')->middleware('throttle:auth')->group(function () {
     // Public routes
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);

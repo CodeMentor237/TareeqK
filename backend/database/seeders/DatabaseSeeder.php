@@ -15,11 +15,48 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1 Admin
+        \App\Models\User::updateOrCreate(
+            ['email' => 'admin@tareeqk.com'],
+            [
+                'name' => 'Admin User',
+                'role' => 'admin',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // 4 Drivers
+        $drivers = \App\Models\User::factory(4)->driver()->create([
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        // 5 Customers
+        $iosCustomer = \App\Models\User::updateOrCreate(
+            ['email' => 'iosisceo@gmail.com'],
+            [
+                'name' => 'IOS CEO',
+                'role' => 'customer',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $customers = \App\Models\User::factory(4)->customer()->create([
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+
+        $allCustomers = $customers->concat([$iosCustomer]);
+
+        // Seed 10 Towing Requests
+        \App\Models\TowingRequest::factory(10)->create([
+            'customer_id' => fn() => $allCustomers->random()->id,
+            'accepted_by' => fn(array $attributes) => 
+                in_array($attributes['status'], ['accepted', 'ongoing', 'completed']) 
+                ? $drivers->random()->id 
+                : null,
         ]);
     }
 }

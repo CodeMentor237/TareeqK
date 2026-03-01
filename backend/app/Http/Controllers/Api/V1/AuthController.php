@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(RegisterUserRequest $request)
+    public function register(RegisterUserRequest $request, \App\Services\OTPService $otpService)
     {
         $validated = $request->validated();
 
@@ -27,30 +27,40 @@ class AuthController extends Controller
             'role' => $validated['role'],
         ]);
 
-        $accessToken = $user->createToken('access_token', ['access:full'], now()->addMinutes(15))->plainTextToken;
-        $refreshToken = $user->createToken('refresh_token', ['issue:access'], now()->addDays(7))->plainTextToken;
+        // Generate OTP using service
+        $otpData = $otpService->generateOTP();
 
-        $authData = [
-            'user' => $user,
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
-        ];
-
-        return (new AuthResource($authData))
-            ->toResponse($request)
-            ->withCookie(
-                cookie(
-                    'refresh_token',
-                    $refreshToken,
-                    10080, // 7 days in minutes
-                    null,
-                    null,
-                    config('app.env') === 'production',
-                    true, // HttpOnly
-                    false,
-                    'Lax'
-                )
+        try {
+            // Send OTP via Email
+            \App\Jobs\SendMailJob::dispatch(
+                $user->name,
+                $user->email,
+                $otpData['otp']
             );
+
+            // Update user with OTP data
+            $user->update([
+                'otp_code' => $otpData['otp'],
+                'otp_expires_at' => $otpData['otp_expires_at']
+            ]);
+
+            return new SuccessResource([
+                'message' => 'Registration successful. Please verify your email with the OTP sent to your email address.',
+                'data' => [
+                    'email' => $user->email,
+                    'expires_in' => 10 // Minutes
+                ]
+            ]);
+        } catch (\Exception $e) {
+            // If email fails, we might still want to return a success but mention the failure, 
+            // or return an error if OTP is strictly required. Here we return success but user will need to resend.
+            return new SuccessResource([
+                'message' => 'Registration successful, but we failed to send the verification email. Please try resending it.',
+                'data' => [
+                    'email' => $user->email
+                ]
+            ]);
+        }
     }
 
     public function login(LoginUserRequest $request)
@@ -63,6 +73,24 @@ class AuthController extends Controller
             return new ErrorResource([
                 'message' => 'Invalid credentials',
                 'status_code' => 401
+            ]);
+        }
+
+        if ($user->email_verified_at === null) {
+            $otpService = app(\App\Services\OTPService::class);
+            $otpData = $otpService->generateOTP();
+            
+            $user->update([
+                'otp_code' => $otpData['otp'],
+                'otp_expires_at' => $otpData['otp_expires_at']
+            ]);
+
+            \App\Jobs\SendMailJob::dispatch($user->name, $user->email, $otpData['otp']);
+
+            return new ErrorResource([
+                'message' => 'Email not verified. A new OTP has been sent to your email.',
+                'errors' => ['email' => $user->email],
+                'status_code' => 403
             ]);
         }
 

@@ -38,7 +38,11 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Exclude login and other auth endpoints from 401 refresh logic
+        const excludedUrls = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/refresh'];
+        const isExcluded = excludedUrls.some(url => originalRequest.url.includes(url));
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isExcluded) {
             if (isRefreshing) {
                 return new Promise(function (resolve, reject) {
                     failedQueue.push({ resolve, reject });
