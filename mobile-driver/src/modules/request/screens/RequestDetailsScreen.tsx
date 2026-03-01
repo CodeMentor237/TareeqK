@@ -32,11 +32,15 @@ export default function RequestDetailsScreen() {
     const loadRequest = async () => {
         setIsLoading(true);
         try {
-            const response = await driverService.getCurrentRequest();
+            const response = await driverService.getRequestDetails(trackingId);
             if (response.data) {
                 setRequest(response.data);
-                setCurrentRequest(response.data);
+                // Only update currentRequest in store if it's an active one
+                if (['accepted', 'in_progress'].includes(response.data.status)) {
+                    setCurrentRequest(response.data);
+                }
             }
+
         } catch {
             Alert.alert('Error', 'Failed to load request details.');
         } finally {
@@ -178,7 +182,7 @@ export default function RequestDetailsScreen() {
                                                 {log.status.replace('_', ' ').toUpperCase()}
                                             </Text>
                                             <Text style={styles.timelineTime}>
-                                                {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </Text>
                                         </View>
                                         <Text style={styles.timelineUpdateBy}>Updated by {log.updated_by}</Text>

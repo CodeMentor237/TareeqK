@@ -20,6 +20,7 @@ Route::middleware(['auth:sanctum', 'role:driver'])->prefix('v1/driver')->group(f
     Route::get('/requests/available', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'available']);
     Route::get('/requests/current', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'current']);
     Route::get('/requests/history', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'history']);
+    Route::get('/requests/{id}', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'show']);
     Route::post('/requests/{id}/accept', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'accept']);
     Route::post('/requests/{id}/decline', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'decline']);
     Route::post('/requests/{id}/status', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'updateStatus']);

@@ -34,10 +34,9 @@ export interface TowingRequest {
 }
 
 export interface RequestLog {
-    id: number;
     status: string;
-    updated_by: number;
-    created_at: string;
+    updated_by: string;
+    timestamp: string;
 }
 
 export interface RequestMedia {
@@ -144,6 +143,14 @@ export const driverService = {
         const response = await api.get('/driver/requests/history', {
             params: { page, filter },
         });
+        return response.data;
+    },
+
+    /**
+     * Get details of a specific request by its tracking ID.
+     */
+    getRequestDetails: async (trackingId: string): Promise<SuccessResponse<TowingRequest | null>> => {
+        const response = await api.get(`/driver/requests/${trackingId}`);
         return response.data;
     },
 };

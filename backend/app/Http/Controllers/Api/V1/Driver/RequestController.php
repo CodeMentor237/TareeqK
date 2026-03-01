@@ -217,4 +217,24 @@ class RequestController extends Controller
 
         return TowingRequestResource::collection($requests);
     }
+
+    public function show(Request $request, $id)
+    {
+        $towingRequest = TowingRequest::where('tracking_id', $id)
+            ->where('accepted_by', $request->user()->id)
+            ->with(['customer', 'logs', 'media'])
+            ->first();
+
+        if (!$towingRequest) {
+            return new SuccessResource([
+                'message' => 'Request not found or not assigned to you',
+                'data' => null
+            ]);
+        }
+
+        return new SuccessResource([
+            'message' => 'Request details retrieved successfully',
+            'data' => new TowingRequestResource($towingRequest)
+        ]);
+    }
 }
