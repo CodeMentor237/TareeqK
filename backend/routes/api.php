@@ -31,4 +31,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('v1/admin')->group(fun
     Route::get('/requests', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'index']);
     Route::post('/requests/{id}/reassign', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'reassign']);
     Route::post('/requests/{id}/status', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'updateStatus']);
+    
+    // User Management
+    Route::get('/users', [\App\Http\Controllers\Api\V1\Admin\UserController::class, 'index']);
+    Route::get('/users/{id}', [\App\Http\Controllers\Api\V1\Admin\UserController::class, 'show']);
 });
