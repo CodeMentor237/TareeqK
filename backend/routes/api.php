@@ -16,8 +16,10 @@ Route::middleware(['auth:sanctum', 'role:customer'])->prefix('v1/customer')->gro
 });
 
 Route::middleware(['auth:sanctum', 'role:driver'])->prefix('v1/driver')->group(function () {
+    Route::post('/availability', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'toggleAvailability']);
     Route::get('/requests/available', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'available']);
     Route::get('/requests/current', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'current']);
+    Route::get('/requests/history', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'history']);
     Route::post('/requests/{id}/accept', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'accept']);
     Route::post('/requests/{id}/decline', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'decline']);
     Route::post('/requests/{id}/status', [\App\Http\Controllers\Api\V1\Driver\RequestController::class, 'updateStatus']);

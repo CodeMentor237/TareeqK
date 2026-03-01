@@ -18,6 +18,17 @@ use Illuminate\Support\Facades\Storage;
 
 class RequestController extends Controller
 {
+    public function toggleAvailability(Request $request)
+    {
+        $user = $request->user();
+        $user->update(['is_available' => !$user->is_available]);
+
+        return new SuccessResource([
+            'message' => $user->is_available ? 'You are now online' : 'You are now offline',
+            'data' => ['is_available' => $user->is_available]
+        ]);
+    }
+
     public function available(Request $request)
     {
         $declinedIds = DriverAction::where('driver_id', $request->user()->id)
@@ -167,5 +178,25 @@ class RequestController extends Controller
             'message' => 'Active request retrieved successfully',
             'data' => new TowingRequestResource($towingRequest)
         ]);
+    }
+
+    public function history(Request $request)
+    {
+        $filter = $request->query('filter', 'all');
+
+        $query = TowingRequest::where('accepted_by', $request->user()->id)
+            ->with(['customer', 'logs']);
+
+        if ($filter === 'completed') {
+            $query->where('status', 'completed');
+        } elseif ($filter === 'cancelled') {
+            $query->where('status', 'cancelled');
+        } else {
+            $query->whereIn('status', ['completed', 'cancelled']);
+        }
+
+        $requests = $query->latest()->paginate(15);
+
+        return TowingRequestResource::collection($requests);
     }
 }

@@ -3,7 +3,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStack } from './AuthStack';
-import HomeScreen from '../modules/home/screens/HomeScreen';
+import { MainTabs } from './MainTabs';
 import { useAuthStore } from '../store/auth.store';
 import { colors } from '../theme/colors';
 
@@ -30,7 +30,7 @@ export function RootNavigator() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {user ? (
-                    <Stack.Screen name="Home" component={HomeScreen} />
+                    <Stack.Screen name="Main" component={MainTabs} />
                 ) : (
                     <Stack.Screen name="Auth" component={AuthStack} />
                 )}
