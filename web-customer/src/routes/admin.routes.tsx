@@ -7,6 +7,7 @@ const AdminDashboard = React.lazy(() => import('../modules/admin/pages/Dashboard
 const Customers = React.lazy(() => import('../modules/admin/pages/Customers'));
 const Drivers = React.lazy(() => import('../modules/admin/pages/Drivers'));
 const TowRequests = React.lazy(() => import('../modules/admin/pages/TowRequests'));
+const TowRequestDetails = React.lazy(() => import('../modules/admin/pages/TowRequestDetails'));
 
 export const AdminRoutes = () => (
     <Routes>
@@ -40,6 +41,14 @@ export const AdminRoutes = () => (
                 element={
                     <ProtectedRoute allowedRoles={['admin']}>
                         <TowRequests />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="requests/:id"
+                element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                        <TowRequestDetails />
                     </ProtectedRoute>
                 }
             />

@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum', 'role:driver'])->prefix('v1/driver')->group(f
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('v1/admin')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'dashboard']);
     Route::get('/requests', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'index']);
+    Route::get('/requests/{id}', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'show']);
     Route::post('/requests/{id}/reassign', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'reassign']);
     Route::post('/requests/{id}/status', [\App\Http\Controllers\Api\V1\Admin\RequestController::class, 'updateStatus']);
     

@@ -16,6 +16,7 @@ class TowingRequestResource extends JsonResource
     {
         return [
             'id' => $this->tracking_id,
+            'tracking_id' => $this->tracking_id,
             'customer_id' => $this->customer_id,
             'customer_name' => $this->customer_name,
             'customer_email' => $this->customer_email,

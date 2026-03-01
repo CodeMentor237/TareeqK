@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../../services/api';
 import { Truck, Clock, CheckCircle, AlertCircle, ClipboardList } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -12,7 +13,7 @@ interface Stats {
 }
 
 interface TowingRequest {
-    id: number;
+    id: string;
     tracking_id: string;
     customer_name: string;
     status: string;
@@ -33,6 +34,8 @@ const StatCard = ({ title, value, icon, color }: { title: string; value: number;
 );
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
+    const { lang } = useParams<{ lang: string }>();
 
     const { data: stats, isLoading: statsLoading } = useQuery<Stats>({
         queryKey: ['admin-stats'],
@@ -96,7 +99,10 @@ const AdminDashboard = () => {
                         <h2 className="font-black text-xl text-gray-900">Recent Activity</h2>
                         <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Live Feed</p>
                     </div>
-                    <button className="text-xs font-black text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-4 py-2 rounded-xl transition-all">
+                    <button
+                        onClick={() => navigate(`/${lang}/admin/requests`)}
+                        className="text-xs font-black text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-4 py-2 rounded-xl transition-all"
+                    >
                         View All Requests
                     </button>
                 </div>
@@ -109,6 +115,7 @@ const AdminDashboard = () => {
                                 <th className="px-8 py-4">Vehicle</th>
                                 <th className="px-8 py-4">Status</th>
                                 <th className="px-8 py-4">Timestamp</th>
+                                <th className="px-8 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -133,6 +140,14 @@ const AdminDashboard = () => {
                                     <td className="px-8 py-5 text-sm font-bold text-gray-400">
                                         {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         <span className="text-[10px] block opacity-50">{new Date(req.created_at).toLocaleDateString()}</span>
+                                    </td>
+                                    <td className="px-8 py-5 text-right">
+                                        <button
+                                            onClick={() => navigate(`/${lang}/admin/requests/${req.tracking_id}`)}
+                                            className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg transition-all"
+                                        >
+                                            View
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

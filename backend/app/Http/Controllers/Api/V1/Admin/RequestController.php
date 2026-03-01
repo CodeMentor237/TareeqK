@@ -32,13 +32,33 @@ class RequestController extends Controller
     {
         $query = TowingRequest::with(['customer', 'driver', 'logs', 'media']);
 
-        if ($request->has('status')) {
+        if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
-        $requests = $query->latest()->paginate(20);
+        if ($request->has('assigned')) {
+            if ($request->assigned === 'true') {
+                $query->whereNotNull('accepted_by');
+            } elseif ($request->assigned === 'false') {
+                $query->whereNull('accepted_by');
+            }
+        }
+
+        $requests = $query->latest()->paginate(15);
 
         return TowingRequestResource::collection($requests);
+    }
+
+    public function show($id)
+    {
+        $towingRequest = TowingRequest::with(['customer', 'driver', 'logs.user', 'media'])
+            ->where('tracking_id', $id)
+            ->firstOrFail();
+
+        return new SuccessResource([
+            'message' => 'Request details retrieved successfully',
+            'data' => new TowingRequestResource($towingRequest)
+        ]);
     }
 
     public function reassign(Request $request, $id)
