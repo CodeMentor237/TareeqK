@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
-    ActivityIndicator, Alert, Linking, SafeAreaView,
+    ActivityIndicator, Alert, Linking,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,7 @@ import { colors } from '../../../theme/colors';
 import { spacing } from '../../../theme/spacing';
 import { driverService, TowingRequest } from '../../../services/driver.service';
 import { useDriverStore } from '../../../store/driver.store';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type OngoingNavigationProp = NativeStackNavigationProp<RootStackParamList, 'OngoingRequest'>;
 type OngoingRouteProp = RouteProp<RootStackParamList, 'OngoingRequest'>;

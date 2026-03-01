@@ -1,59 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TareeqK Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The backend for TareeqK, a professional towing and roadside assistance service platform. This API handles authentication, request management, driver assignment, and administrative tasks.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **PHP**: ^8.2
+- **Framework**: Laravel 12.0
+- **Database**: MySQL
+- **Authentication**: Laravel Sanctum (Token-based)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Getting Started
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Prerequisites
 
-## Learning Laravel
+- PHP 8.2 or higher
+- Composer
+- MySQL
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone the repository** (if not already done) and navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-## Laravel Sponsors
+2. **Install dependencies**:
+   ```bash
+   composer install
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Environment Setup**:
+   Copy the example environment file and configure your database:
+   ```bash
+   cp .env.example .env
+   ```
+   *Note: By default, it uses MySQL. Ensure MySQL is running.*
 
-### Premium Partners
+4. **Generate Application Key**:
+   ```bash
+   php artisan key:generate
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. **Run Migrations**:
+   ```bash
+   php artisan migrate
+   ```
 
-## Contributing
+6. **Run Seeders**:
+   ```bash
+   php artisan db:seed
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Running the Application
 
-## Code of Conduct
+To start the local development server:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan serve
+```
 
-## Security Vulnerabilities
+The API will be accessible at `http://localhost:8000`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## API Endpoints
+
+### Authentication (`/api/v1/auth`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/register` | Register a new user |
+| POST | `/login` | Authenticate and get tokens |
+| POST | `/send-otp` | Send One-Time Password |
+| POST | `/verify-otp` | Verify OTP for login/verification |
+| POST | `/refresh` | Refresh access token |
+| DELETE | `/logout` | Invalidate current token (Auth required) |
+| GET | `/user` | Get authenticated user profile (Auth required) |
+
+### Customer Portal (`/api/v1/customer`)
+*Requires `auth:sanctum` and `customer` role.*
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/v1/requests` | Create a new towing request (Guest/Public) |
+| GET | `/v1/requests/track/{id}` | Track a request by ID (Guest/Public) |
+| GET | `/requests` | List customer's own requests |
+| GET | `/requests/{id}` | Get specific request details |
+| POST | `/requests/{id}/cancel` | Cancel a pending request |
+
+### Driver Portal (`/api/v1/driver`)
+*Requires `auth:sanctum` and `driver` role.*
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/availability` | Toggle driver availability |
+| GET | `/requests/available` | List nearby available requests |
+| GET | `/requests/current` | Get current active assignment |
+| GET | `/requests/history` | List driver's completed requests |
+| POST | `/requests/{id}/accept` | Accept a towing request |
+| POST | `/requests/{id}/decline` | Decline a towing request |
+| POST | `/requests/{id}/status` | Update status of an active request |
+
+### Admin Portal (`/api/v1/admin`)
+*Requires `auth:sanctum` and `admin` role.*
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| GET | `/dashboard` | Get administrative overview statistics |
+| GET | `/requests` | List all requests in the system |
+| POST | `/requests/{id}/reassign` | Reassign a request to another driver |
+| GET | `/users` | List all registered users |
 
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+

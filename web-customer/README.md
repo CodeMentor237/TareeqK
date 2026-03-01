@@ -1,73 +1,96 @@
-# React + TypeScript + Vite
+# TareeqK Web Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive web application for TareeqK, featuring both a **Customer Portal** and an **Admin Dashboard**. Built with React 19, TypeScript, and Tailwind CSS v4.
 
-Currently, two official plugins are available:
+## Portals Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 👤 Customer Portal
+The customer portal allows users to:
+- **Create Towing Requests**: A multi-step form to request immediate or scheduled assistance.
+- **Guest Tracking**: Track the real-time status and location of a tow truck without needing an account.
+- **Dashboard**: View active requests and manage profile settings (for registered users).
+- **Request History**: Access a comprehensive log of past towing services.
 
-## React Compiler
+### 🔐 Admin Dashboard
+The administrative interface provides:
+- **Overview Statistics**: Real-time insights into active requests and system performance.
+- **Request Management**: Monitor, assign, and manage all incoming towing requests.
+- **User Management**: Oversee customer and driver accounts.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- **Core**: React 19, TypeScript
+- **Build Tool**: Vite 7
+- **Styling**: Tailwind CSS v4 (with PostCSS)
+- **State Management**: Zustand
+- **Data Fetching**: TanStack Query (React Query) v5
+- **Routing**: React Router 7
+- **Maps**: Google Maps API (@vis.gl/react-google-maps)
+- **Authentication**: Axios + Sanctum Token Interceptors
+- **Internationalization**: i18next
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Node.js**: v18 or higher (v20+ recommended)
+- **npm**: v9 or higher
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+1. **Navigate to the directory**:
+   ```bash
+   cd web-customer
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**:
+   Create a `.env` file in the root directory:
+   ```bash
+   cp .env.example .env
+   ```
+   *Note: Ensure you provide a valid `VITE_API_URL` (pointing to your backend) and a `VITE_GOOGLE_MAPS_API_KEY`.*
+
+### Running Locally
+
+To start the development server:
+```bash
+npm run dev
+```
+The application will be available at `http://localhost:5173`.
+
+### Building for Production
+
+To create a production-ready bundle:
+```bash
+npm run build
+```
+The output will be in the `dist/` directory.
+
+## Project Structure
+
+```text
+src/
+├── components/ # Reusable UI components (Buttons, Inputs, Modals)
+├── hooks/      # Custom React hooks
+├── layouts/    # Page layouts (CustomerLayout, AdminLayout)
+├── modules/    # Feature-based logic (Admin, Auth, Customer, Maps, Tracking)
+├── routes/     # Route definitions for Public, Customer, and Admin
+├── services/   # API communication logic (Axios instances)
+├── store/      # Zustand state stores
+├── types/      # TypeScript definitions
+└── utils/      # Helper functions and constants
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Contributing
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Please ensure you follow the established TypeScript patterns and use Tailwind CSS v4 utilities for styling.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## License
+
+This project is proprietary and confidential.
+
