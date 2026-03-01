@@ -25,10 +25,12 @@ const AppContent = () => {
         }
     }, [lang, i18n, navigate, location.pathname]);
 
+    const isLayoutRoute = location.pathname.includes('/customer/') || location.pathname.includes('/admin/');
+
     return (
         <QueryClientProvider client={queryClient}>
             <div className="min-h-screen bg-white">
-                <Navbar />
+                {!isLayoutRoute && <Navbar />}
                 <Suspense fallback={<div className="flex h-screen items-center justify-center font-medium">Loading...</div>}>
                     <Routes>
                         <Route path="admin/*" element={<AdminRoutes />} />

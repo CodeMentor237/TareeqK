@@ -16,7 +16,7 @@ class RequestStatusLogResource extends JsonResource
     {
         return [
             'status' => $this->status,
-            'updated_by' => $this->user->name,
+            'updated_by' => $this->user ? $this->user->name : 'System',
             'timestamp' => $this->created_at,
         ];
     }

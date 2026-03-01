@@ -22,7 +22,7 @@ class UpdateStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string|in:ongoing,completed',
+            'status' => 'required|string|in:accepted,in_progress,completed,cancelled',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
         ];

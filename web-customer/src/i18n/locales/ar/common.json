@@ -5,5 +5,12 @@
     "logout": "تسجيل الخروج",
     "request_towing": "طلب سحب",
     "track_request": "تتبع الطلب",
-    "loading": "جاري التحميل..."
+    "loading": "جاري التحميل...",
+    "dashboard": "لوحة التحكم",
+    "new_request": "طلب جديد",
+    "my_requests": "طلباتي",
+    "recent_requests": "الطلبات الأخيرة",
+    "track": "تتبع",
+    "cancel": "إلغاء",
+    "cancel_request": "إلغاء الطلب"
 }

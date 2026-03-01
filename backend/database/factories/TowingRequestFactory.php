@@ -35,7 +35,7 @@ class TowingRequestFactory extends Factory
             'destination_lng' => $pickupLng + (fake()->longitude(-0.1, 0.1)),
             'destination_address' => fake()->address(),
             'note' => fake()->sentence(),
-            'status' => fake()->randomElement(['pending', 'accepted', 'ongoing', 'completed', 'cancelled']),
+            'status' => fake()->randomElement(['pending', 'accepted', 'in_progress', 'completed', 'cancelled']),
             'accepted_by' => null,
         ];
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\StoreTowingRequest;
 use App\Http\Resources\TowingRequestResource;
+use App\Http\Resources\PublicTowingRequestResource;
 use App\Http\Resources\SuccessResource;
 use App\Http\Resources\ErrorResource;
 use App\Models\TowingRequest;
@@ -39,7 +40,7 @@ class RequestController extends Controller
 
         return new SuccessResource([
             'message' => 'Request details retrieved successfully',
-            'data' => new TowingRequestResource($towingRequest)
+            'data' => new PublicTowingRequestResource($towingRequest)
         ]);
     }
 

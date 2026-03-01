@@ -113,10 +113,10 @@ class RequestController extends Controller
             $newStatus = $request->status;
 
             // Simple transition validation
-            if ($towingRequest->status === 'accepted' && $newStatus !== 'ongoing') {
+            if ($towingRequest->status === 'accepted' && $newStatus !== 'in_progress') {
                 return new ErrorResource(['message' => 'Invalid status transition', 'status_code' => 422]);
             }
-            if ($towingRequest->status === 'ongoing' && $newStatus !== 'completed') {
+            if ($towingRequest->status === 'in_progress' && $newStatus !== 'completed') {
                 return new ErrorResource(['message' => 'Invalid status transition', 'status_code' => 422]);
             }
 
@@ -152,7 +152,7 @@ class RequestController extends Controller
     public function current(Request $request)
     {
         $towingRequest = TowingRequest::where('accepted_by', $request->user()->id)
-            ->whereIn('status', ['accepted', 'ongoing'])
+            ->whereIn('status', ['accepted', 'in_progress'])
             ->with(['customer', 'logs', 'media'])
             ->first();
 
