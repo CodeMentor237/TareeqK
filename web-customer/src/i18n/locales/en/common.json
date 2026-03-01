@@ -1,0 +1,16 @@
+{
+    "welcome": "Welcome to TareeqK",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "request_towing": "Request Towing",
+    "track_request": "Track Request",
+    "loading": "Loading...",
+    "dashboard": "Dashboard",
+    "new_request": "New Request",
+    "my_requests": "My Requests",
+    "recent_requests": "Recent Requests",
+    "track": "Track",
+    "cancel": "Cancel",
+    "cancel_request": "Cancel Request"
+}

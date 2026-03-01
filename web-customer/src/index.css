@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0066FF;
+  --color-primary-dark: #0052CC;
+  --color-primary-light: #3385FF;
+  --color-secondary: #1A1A1A;
+  --color-secondary-light: #333333;
+}
+
+/* Custom CSS variables for components if needed */
+:root {
+  --primary-rgb: 0, 102, 255;
+}
+
+@layer base {
+  [dir="rtl"] {
+    font-family: 'Inter', sans-serif;
+    /* Fallback, should ideally use an Arabic font */
+  }
+
+  body {
+    @apply bg-white text-secondary antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors duration-200;
+  }
+}
