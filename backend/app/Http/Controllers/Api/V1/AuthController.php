@@ -76,6 +76,14 @@ class AuthController extends Controller
             ]);
         }
 
+        // Driver-only mobile app gate
+        if ($validated['device_type'] === 'mobile' && $user->role !== 'driver') {
+            return new ErrorResource([
+                'message' => 'This app is for drivers only. Please use the web application to access your account.',
+                'status_code' => 403
+            ]);
+        }
+
         if ($user->email_verified_at === null) {
             $otpService = app(\App\Services\OTPService::class);
             $otpData = $otpService->generateOTP();

@@ -20,7 +20,7 @@ const LoginPage = () => {
 
     const loginMutation = useMutation({
         mutationFn: async () => {
-            const response = await api.post('/v1/auth/login', { email, password });
+            const response = await api.post('/v1/auth/login', { email, password, device_type: 'web' });
             return response.data;
         },
         onSuccess: (responseBody) => {

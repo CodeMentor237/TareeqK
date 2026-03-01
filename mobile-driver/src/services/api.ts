@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '../store/auth.store';
 
-const API_URL = 'http://10.0.2.2:8000/api/v1'; // 10.0.2.2 is mapped to localhost for Android emulator
+const API_URL = 'http://localhost:8000/api/v1'; // Use localhost with adb reverse for physical devices, or 10.0.2.2 for emulator
 
 export const api = axios.create({
     baseURL: API_URL,
@@ -9,7 +10,10 @@ export const api = axios.create({
         'Content-Type': 'application/json',
         Accept: 'application/json',
     },
+    timeout: 15000, // 15 second timeout
 });
+
+// ─── Request Interceptor ───────────────────────────────────────────────────────
 
 api.interceptors.request.use(
     async (config) => {
@@ -24,21 +28,22 @@ api.interceptors.request.use(
     }
 );
 
+// ─── Response Interceptor (Token Refresh + Force Logout) ────────────────────────
+
 api.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
         // Check if error is 401 and we haven't already retried
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
+
             try {
                 const refreshToken = await AsyncStorage.getItem('refresh_token');
                 if (refreshToken) {
                     const res = await axios.post(`${API_URL}/auth/refresh`, {
-                        refresh_token: refreshToken
+                        refresh_token: refreshToken,
                     });
 
                     if (res.data?.data?.access_token) {
@@ -53,13 +58,23 @@ api.interceptors.response.use(
                     }
                 }
             } catch {
-                // If refresh fails, clear auth state
-                await AsyncStorage.removeItem('access_token');
-                await AsyncStorage.removeItem('refresh_token');
-                // We'd ideally trigger a logout action here via Zustand
+                // Refresh failed — force logout and clear all auth state
+                await forceLogout();
             }
         }
 
         return Promise.reject(error);
     }
 );
+
+/**
+ * Clears all stored auth data and resets the Zustand auth store.
+ * This forces the app back to the login screen.
+ */
+async function forceLogout(): Promise<void> {
+    await AsyncStorage.removeItem('access_token');
+    await AsyncStorage.removeItem('refresh_token');
+    await AsyncStorage.removeItem('user');
+    // Reset Zustand store (non-hook access)
+    useAuthStore.getState().clearAuth();
+}

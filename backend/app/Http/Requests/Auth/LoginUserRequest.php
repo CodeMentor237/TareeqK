@@ -26,6 +26,7 @@ class LoginUserRequest extends FormRequest
         return [
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8',
+            'device_type' => 'nullable|string|in:mobile,web',
         ];
     }
 
@@ -43,6 +44,8 @@ class LoginUserRequest extends FormRequest
             
             'password.required' => 'Password is required',
             'password.min' => 'Password must be at least 8 characters long',
+
+            'device_type.in' => 'Device type must be mobile or web',
         ];
     }
 
@@ -56,6 +59,7 @@ class LoginUserRequest extends FormRequest
         return [
             'email' => 'Email',
             'password' => 'Password',
+            'device_type' => 'Device Type',
         ];
     }
 
